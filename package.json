@@ -1,0 +1,25 @@
+{
+  "name": "friend-smash",
+  "version": "1.0.0",
+  "description": "Now you get to experience fast-paced smashing between friends",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dylanjtholen/Friend-smash.git"
+  },
+  "author": "me",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/dylanjtholen/Friend-smash/issues"
+  },
+  "homepage": "https://github.com/dylanjtholen/Friend-smash#readme",
+  "dependencies": {
+    "express": "^4.18.2",
+    "express.io": "^1.1.13",
+    "socket.io": "^4.5.4"
+  }
+}

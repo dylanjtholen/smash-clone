@@ -1,0 +1,8 @@
+html {
+    background-color: black;
+}
+
+canvas {
+    margin: auto;
+    display: block;
+}
