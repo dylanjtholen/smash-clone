@@ -127,9 +127,4 @@ function emitGameState(room, gameState) {
     .emit('gameState', JSON.stringify(gameState));
 }
 
-var app = require('express')()
-app.get('*', function(req, res) {
-  res.sendFile('./index.html', {root: __dirname })
-});
-
 io.listen(process.env.PORT || 3000);
