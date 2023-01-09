@@ -59,7 +59,6 @@ canvas.addEventListener('mousedown', function () {
 })
 
 function newGame() {
-    alert(server)
   socket.emit('newGame', usernameInput.value);
   init();
 }

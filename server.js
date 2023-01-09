@@ -16,7 +16,7 @@ function makeid(length) {
 }
 
 io.on('connection', client => {
-
+  console.log(client)
   client.on("disconnecting", handleDisconnect);
   client.on('newGame', handleNewGame);
   client.on('joinGame', handleJoinGame);
