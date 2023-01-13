@@ -127,4 +127,6 @@ function emitGameState(room, gameState) {
     .emit('gameState', JSON.stringify(gameState));
 }
 
-io.listen(process.env.PORT || 3000);
+let port = process.env.PORT || 3000
+console.log('server listening on port: ' + port)
+io.listen(port);
