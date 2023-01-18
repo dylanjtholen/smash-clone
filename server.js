@@ -1,5 +1,20 @@
-const io = require('socket.io')();
 const { initGame, gameLoop } = require('./game');
+
+const express = require('express');
+const app = express();
+const http = require('http');
+const server = http.createServer(app);
+const { Server } = require("socket.io");
+const io = new Server(server);
+app.use(express.static(__dirname + '/frontend'))
+
+app.get('/', (req, res) => {
+  res.sendFile('frontend/index.html', {root: __dirname });
+});
+
+server.listen(5500, () => {
+  console.log('frontend on *:5500');
+});
 
 const state = {};
 const clientRooms = {};
@@ -16,23 +31,24 @@ function makeid(length) {
 }
 
 io.on('connection', client => {
-  console.log(client)
   client.on("disconnecting", handleDisconnect);
   client.on('newGame', handleNewGame);
   client.on('joinGame', handleJoinGame);
   client.on('startGame', handleStartGame)
+  client.on('keydown', handleKeyDown)
+  client.on('keyup', handleKeyUp)
 
   function handleJoinGame({roomName, username}) {
-    const room = io.sockets.adapter.rooms[roomName];
+    const room = io.sockets.adapter.rooms.get(roomName);
 
     let allUsers;
     if (room) {
-      allUsers = room.sockets;
+      allUsers = state[roomName].players;
     }
 
     let numClients = 0;
     if (allUsers) {
-      numClients = Object.keys(allUsers).length;
+      numClients = state[roomName].players.length;
     }
 
     if (numClients === 0) {
@@ -61,7 +77,7 @@ io.on('connection', client => {
     clientRooms[client.id] = roomName;
 
     client.join(roomName);
-    state[roomName].players.push({username: username, id: client.id})
+    state[roomName].players.push({username: username, id: client.id, keysDown: [], character: {x: 0, y: 0, xVelocity: 0, yVelocity: 0}, keys: []})
     client.number = 2;
     client.emit('init', 2);
       }
@@ -98,7 +114,7 @@ io.on('connection', client => {
     }
 
     state[roomName] = initGame();
-    state[roomName].players.push({username: username, id: client.id})
+    state[roomName].players.push({username: username, id: client.id, keysDown: [], character: {x: 0, y: 0, xVelocity: 0, yVelocity: 0}, keys: []})
 
     client.join(roomName);
     client.number = 1;
@@ -111,6 +127,18 @@ io.on('connection', client => {
     let roomName = clientRooms[client.id]
     state[roomName].gameStarted = true
   }
+
+  function handleKeyDown(key) {
+    let roomName = clientRooms[client.id]
+    let player = state[roomName].players.find(item => item.id == client.id)
+    player.keys[key] = true
+  }
+
+  function handleKeyUp(key) {
+    let roomName = clientRooms[client.id]
+    let player = state[roomName].players.find(item => item.id == client.id)
+    player.keys[key] = false
+  }
 });
 
 function startGameInterval(roomName) {
@@ -119,6 +147,8 @@ function startGameInterval(roomName) {
     state[roomName] = gameLoop(tempState);
       emitGameState(roomName, state[roomName])
   }, 1000 / FRAME_RATE);
+
+  
 }
 
 function emitGameState(room, gameState) {
@@ -128,5 +158,5 @@ function emitGameState(room, gameState) {
 }
 
 let port = process.env.PORT || 3000
-console.log('server listening on port: ' + port)
+console.log('game server listening on port: ' + port)
 io.listen(port);

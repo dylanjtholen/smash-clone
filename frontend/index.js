@@ -16,12 +16,15 @@ let mousey
 
 const ground = [{ x: 960, y: 0, w: 100, h: 1060 }, { x: 0, y: 230, w: 350, h: 80 }, { x: 255, y: 10, w: 100, h: 300 }, { x: 35, y: 5, w: 315, h: 85 }, { x: 30, y: 5, w: 95, h: 625 }, { x: 30, y: 550, w: 325, h: 85 }, { x: 255, y: 325, w: 100, h: 305 }, { x: 260, y: 330, w: 315, h: 80 }, { x: 475, y: 330, w: 105, h: 207 }, { x: 475, y: 455, w: 260, h: 80 }, { x: 635, y: 135, w: 100, h: 405 }, { x: 385, y: 135, w: 350, h: 85 }, { x: 385, y: 35, w: 95, h: 180 }, { x: 385, y: 40, w: 510, h: 85 }, { x: 800, y: 40, w: 95, h: 340 }, { x: 800, y: 290, w: 160, h: 85 }]
 
+const playerWidth = 64
+const playerHeight = 64
+
 const queryString = window.location.search;
 console.log(queryString);
 const urlParams = new URLSearchParams(queryString);
 let server = urlParams.get('g') || 'https://dylanjtholen-bug-free-lamp-7grqpxq7jwcwj9-3000.preview.app.github.dev/'
 
-const socket = io(server);
+const socket = io();
 
 socket.on('init', handleInit);
 socket.on('gameState', handleGameState);
@@ -48,15 +51,15 @@ joinGameBtn.addEventListener('click', joinGame);
 startGameBtn.addEventListener('click', startGame)
 copyCodeBtn.addEventListener('click', copyGameCode)
 
-canvas.addEventListener('mousemove', function () {
+window.addEventListener('mousemove', function () {
   let pos = findPos(canvas)
   mousex = event.clientX - (((window.innerWidth - canvas.width) / 2) + (canvas.width / 10))
   mousey = event.clientY - (window.innerHeight - canvas.height) / 2
   socket.emit('mousemove', {x: mousex, y: mousey, playerNumber: playerNumber})
 })
-canvas.addEventListener('mousedown', function () {
-  mouseDown = true
-})
+
+window.addEventListener('keydown', keydown)
+window.addEventListener('keyup', keyup)
 
 function newGame() {
   socket.emit('newGame', usernameInput.value);
@@ -77,6 +80,7 @@ function startGame() {
 }
 
 function init() {
+  try {
   initialScreen.style.display = "none";
   gameScreen.style.display = "block";
 
@@ -84,11 +88,14 @@ function init() {
   canvas = document.getElementById('canvas');
   c = canvas.getContext('2d');
 
-  canvas.width = 1060;
+  canvas.width = 960;
   canvas.height = 640;
 
   c.fillStyle = 'gray';
   c.fillRect(0, 0, canvas.width, canvas.height);
+  c.fillStyle = 'white'
+  c.font = '32px sans-serif'
+  c.fillText('Waiting for host to start the game...', 0, 32)
   bound = canvas.getBoundingClientRect();
 
   document.getElementById('stylesheet').setAttribute('href', 'style.css')
@@ -96,6 +103,9 @@ function init() {
   document.getElementById('stylesheet').removeAttribute('crossorigin')
 
   gameActive = true;    
+} catch (err) {
+  alert(err)
+}
 }
 
 function findPos(obj) {
@@ -183,7 +193,15 @@ function findPos(obj) {
   }
 
 function keydown(e) {
-  socket.emit('keydown', e.keyCode);
+  if (gameActive) {
+  socket.emit('keydown', e.key);
+  }
+}
+
+function keyup(e) {
+  if (gameActive) {
+  socket.emit('keyup', e.key);
+  }
 }
 
 function copyGameCode() {
@@ -192,7 +210,22 @@ function copyGameCode() {
 
 function drawGame(state) {
   gameState = state
-  gamespeed = state.gamespeed
+
+  c.clearRect(0, 0, canvas.width, canvas.height)
+
+  c.fillStyle = 'green'
+
+  for (let i in gameState.ground) {
+    let ground = gameState.ground[i]
+    c.fillRect(ground.x, ground.y, ground.w, ground.h)
+  }
+
+  c.fillStyle = 'red'
+
+  for (let i in gameState.players) {
+    let player = gameState.players[i]
+    c.fillRect(player.character.x, player.character.y, playerWidth, playerHeight)
+  }
   
 }
 
