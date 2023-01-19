@@ -35,6 +35,9 @@ socket.on('tooManyPlayers', handleTooManyPlayers);
 socket.on('gameAlreadyStarted', handleGameAlreadyStarted)
 socket.on('usernameTooLong', handleUsernameTooLong);
 socket.on('noUsername', handleNoUsername)
+socket.on("disconnect", () => {
+  reset()
+})
 
 const gameScreen = document.getElementById('gameScreen');
 const initialScreen = document.getElementById('initialScreen');

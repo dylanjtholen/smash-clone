@@ -23,11 +23,45 @@ module.exports = {
     let isOnGround = false
       for (let i in gameState.ground) {
         let ground = gameState.ground[i]
-        if (isColliding(player.character.x, player.character.y, playerWidth, playerHeight, ground.x, ground.y, ground.w, ground.h)) {
+        let groundCenter = center(ground.x, ground.y, ground.w, ground.h)
+        if (isColliding(player.character.x, player.character.y, playerWidth, playerHeight, ground.x, ground.y, ground.w, ground.h) && groundCenter.y >= player.character.y) {
           isOnGround = true
+          player.character.y = ground.y - playerHeight
         }
       }
       return isOnGround
+  }
+
+  function checkIfHeadBump(player) {
+    let headBump = false
+      for (let i in gameState.ground) {
+        let ground = gameState.ground[i]
+        let groundCenter = center(ground.x, ground.y, ground.w, ground.h)
+        if (isColliding(player.character.x, player.character.y, playerWidth, playerHeight, ground.x, ground.y, ground.w, ground.h) && groundCenter.y <= player.character.y) {
+          headBump = true
+          player.character.y = ground.y + ground.w + 1
+        }
+      }
+      return headBump
+  }
+
+  function checkForSideCollisions(player) {
+      for (let i in gameState.ground) {
+        let ground = gameState.ground[i]
+        let groundCenter = center(ground.x, ground.y, ground.w, ground.h)
+        if (isColliding(player.character.x, player.character.y, playerWidth, playerHeight, ground.x, ground.y, ground.w, ground.h) && groundCenter.x >= player.character.x && player.character.yVelocity > 0) {
+          player.character.xVelocity = 0
+          player.character.x = ground.x + ground.w + 1
+        }
+        if (isColliding(player.character.x, player.character.y, playerWidth, playerHeight, ground.x, ground.y, ground.w, ground.h) && groundCenter.x <= player.character.x && player.character.yVelocity < 0) {
+          player.character.xVelocity = 0
+          player.character.x = ground.x - playerWidth - 1
+        }
+      }
+  }
+
+  function center(x, y, w, h) {
+    return {x: x + w / 2, y: y + h / 2}
   }
   
   function initGame() {
@@ -51,6 +85,7 @@ module.exports = {
     if (!state) {
       return;
     }
+
     gameState = state
     deltaTime = (new Date().getTime() - lastFrameTimeStamp)/20;
     lastFrameTimeStamp = new Date().getTime()
@@ -70,11 +105,6 @@ module.exports = {
 
       if (player.character.isOnGround) {
         player.character.yVelocity = 0
-        let aboveGround = false
-        while (!aboveGround) {
-          player.character.y -= 5
-          aboveGround = checkIfOnGround(player)
-        }
       } else {
         player.character.yVelocity += gravity
       }
@@ -83,13 +113,19 @@ module.exports = {
         player.character.yVelocity -= playerSpeed * 5
       }
 
-      player.character.x += player.character.xVelocity
+      if (!checkIfHeadBump(player)) {
       player.character.y += player.character.yVelocity
+      }
+
+      player.character.x += player.character.xVelocity
       if (player.character.xVelocity != 0) {
       player.character.xVelocity -= player.character.xVelocity / Math.abs(player.character.xVelocity)
       }
+      checkIfOnGround(player)
+      checkIfHeadBump(player)
+      checkForSideCollisions(player)
     }
   }
     
-    return gameState;
+    return gameState
   }
