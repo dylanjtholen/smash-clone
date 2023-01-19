@@ -123,16 +123,7 @@ function findPos(obj) {
   function distance(x, y, x2, y2) {
     return Math.sqrt((x - x2) ** 2 + (y - y2) ** 2)
   }
-  
-  function isColliding(x, y, w, h, x2, y2, w2, h2) {
-    if ((((x <= x2) && ((x + w) >= (x2 + w2))) || ((x >= x2) && (x <= (x2 + w2)) || (((x + w) >= x2) && ((x + w) <= (x2 + w2))))) && (((y >= y2) && (y <= (y2 + h2)) || (((y + h) >= y2) && ((y + h) <= (y2 + h2)))) || ((y <= y2) && ((y + h) >= (y2 + h2))))) {
-      return true
-    } else if (((x <= x2) && ((x + w) >= (x2 + w2))) && ((y <= y2) && ((y + h) >= (y2 + h2)))) {
-      return true
-    } else {
-      return false
-    }
-  }
+
   
   function lineLineIntersection(x1, y1, x2, y2, x3, y3, x4, y4) {
   
@@ -159,37 +150,6 @@ function findPos(obj) {
     }
     return intersecting
   
-  }
-  
-  function checkCollision(x, y, w, h) {
-    let valid = []
-    for (let i in gameState.players) {
-      let player = gameState.players[i]
-      if (isColliding(gameState.players[i].position.x - player.size, gameState.players[i].position.y - player.size, player.size * 2, player.size * 2, x, y, w, h)) {
-        valid.push(player)
-      }
-    }
-    for (let i in gameState.players) {
-      let player = gameState.players[i]
-      if (isColliding(x, y, w, h, gameState.players[i].position.x - player.size, gameState.players[i].position.y - player.size, player.size * 2, player.size * 2)) {
-        valid.push(player)
-      }
-    }
-    for (let i in ground) {
-      if (isColliding(x, y, w, h, ground[i].x, ground[i].y, ground[i].w, ground[i].h)) {
-        valid.push(ground[i])
-      }
-    }
-    for (let i in ground) {
-      if (isColliding(ground[i].x, ground[i].y, ground[i].w, ground[i].h, x, y, w, h)) {
-        valid.push(ground[i])
-      }
-    }
-    if (valid.length > 0) {
-      return true
-    } else {
-      return false
-    }
   }
 
 function keydown(e) {
