@@ -4,7 +4,7 @@
   "description": "Now you get to experience fast-paced smashing between friends",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "node server.js",
     "start": "node server.js"
   },
   "repository": {
@@ -23,6 +23,7 @@
     "socket.io": "^4.5.4"
   },
   "devDependencies": {
-    "@types/socket.io": "^3.0.2"
+    "@types/socket.io": "^3.0.2",
+    "webpack-cli": "^5.0.1"
   }
 }
