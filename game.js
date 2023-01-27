@@ -1,9 +1,11 @@
 module.exports = {
     initGame,
     gameLoop,
+    keyPress,
   }
 
-  const ground = [{x: 0, y: 540, w: 960, h: 100}, {x: 430, y: 270, w: 100, h: 100}]
+  const ground = [{x: 0, y: 540, w: 960, h: 100}, {x: 430, y: 270, w: 100, h: 270}]
+  const jumpableWalls = [{direction: 'right', x: 420, y: 270, w: 10, h: 270}, {direction: 'left', x: 530, y: 270, w: 10, h: 270}]
   const playerSpeed = 4
   const gravity = 1
   const playerWidth = 64
@@ -26,10 +28,40 @@ module.exports = {
         let groundCenter = center(ground.x, ground.y, ground.w, ground.h)
         if (isColliding(player.character.x, player.character.y, playerWidth, playerHeight, ground.x, ground.y, ground.w, ground.h) && groundCenter.y >= player.character.y) {
           isOnGround = true
-          player.character.y = ground.y - playerHeight
+          player.character.y = (ground.y - playerHeight) - 1
+          player.character.yVelocity = 0
         }
       }
       return isOnGround
+  }
+
+  function keyPress(player, key) {
+    if (checkForWallJumps(player) && key == 'w') {
+      player.character.yVelocity = playerSpeed * -5
+      if (player.keys['a']) {
+        player.character.xVelocity += playerSpeed * 7
+      }
+      if (player.keys['d']) {
+        player.character.xVelocity -= playerSpeed * 7
+      }
+    }
+  }
+
+  function checkForWallJumps(player) {
+    let isOnWall = false
+      for (let i in gameState.jumpableWalls) {
+        let jumpableWall = gameState.jumpableWalls[i]
+        let jumpableWallCenter = center(jumpableWall.x, jumpableWall.y, jumpableWall.w, jumpableWall.h)
+        if (isColliding(player.character.x, player.character.y, playerWidth, playerHeight, jumpableWall.x, jumpableWall.y, jumpableWall.w, jumpableWall.h)) {
+          if (player.keys['a'] && jumpableWall.direction == 'left') {
+          isOnWall = true
+          }
+          if (player.keys['d'] && jumpableWall.direction == 'right') {
+          isOnWall = true
+          }
+        }
+      }
+      return isOnWall
   }
 
   function checkIfHeadBump(player) {
@@ -39,26 +71,23 @@ module.exports = {
         let groundCenter = center(ground.x, ground.y, ground.w, ground.h)
         if (isColliding(player.character.x, player.character.y, playerWidth, playerHeight, ground.x, ground.y, ground.w, ground.h) && groundCenter.y <= player.character.y) {
           headBump = true
-          player.character.y = ground.y + ground.w + 1
+          player.character.y = ground.y + ground.h + 1
+          player.character.yVelocity *= -0.1
         }
       }
       return headBump
   }
 
-  function checkForSideCollisions(player) {
-      for (let i in gameState.ground) {
-        let ground = gameState.ground[i]
-        let groundCenter = center(ground.x, ground.y, ground.w, ground.h)
-        if (isColliding(player.character.x, player.character.y, playerWidth, playerHeight, ground.x, ground.y, ground.w, ground.h) && groundCenter.x >= player.character.x && player.character.yVelocity > 0) {
-          player.character.xVelocity = 0
-          player.character.x = ground.x + ground.w + 1
-        }
-        if (isColliding(player.character.x, player.character.y, playerWidth, playerHeight, ground.x, ground.y, ground.w, ground.h) && groundCenter.x <= player.character.x && player.character.yVelocity < 0) {
-          player.character.xVelocity = 0
-          player.character.x = ground.x - playerWidth - 1
-        }
-      }
+function checkFutureSideCollisions(player, distance, add1) {
+  for (let i in gameState.ground) {
+    let ground = gameState.ground[i]
+    let groundCenter = center(ground.x, ground.y, ground.w, ground.h)
+    if (isColliding(player.character.x + distance, player.character.y - add1, playerWidth, playerHeight, ground.x, ground.y, ground.w, ground.h)) {
+      //player.character.x = ground.x + ground.w + 1
+      return true
+    }
   }
+}
 
   function center(x, y, w, h) {
     return {x: x + w / 2, y: y + h / 2}
@@ -77,7 +106,8 @@ module.exports = {
     return {
       gameStarted: false,
       players: [],
-      ground: ground
+      ground: ground,
+      jumpableWalls: jumpableWalls
     };
   }
   
@@ -94,14 +124,12 @@ module.exports = {
 
     for (let i in gameState.players) {
       let player = gameState.players[i]
-      if (player.keys['a'] && player.character.xVelocity >= -15) {
+      if (player.keys['a'] && player.character.xVelocity >= -15 && (!checkFutureSideCollisions(player, -playerSpeed) || player.character.isOnGround)) {
         player.character.xVelocity -= playerSpeed
       }
-      if (player.keys['d'] && player.character.xVelocity <= 15) {
+      if (player.keys['d'] && player.character.xVelocity <= 15 && (!checkFutureSideCollisions(player, playerSpeed) || player.character.isOnGround)) {
         player.character.xVelocity += playerSpeed
       }
-
-      player.character.isOnGround = checkIfOnGround(player)
 
       if (player.character.isOnGround) {
         player.character.yVelocity = 0
@@ -113,17 +141,26 @@ module.exports = {
         player.character.yVelocity -= playerSpeed * 5
       }
 
-      if (!checkIfHeadBump(player)) {
+      if (checkForWallJumps(player) && !player.character.isOnGround && player.character.yVelocity >= 0) {
+        player.character.yVelocity = 2
+      }
+
+      if (!player.character.headBump) {
       player.character.y += player.character.yVelocity
       }
 
+      if (!checkFutureSideCollisions(player, player.character.xVelocity, true)) {
       player.character.x += player.character.xVelocity
+      } else if (!checkFutureSideCollisions(player, player.character.xVelocity, false)) {
+        player.character.x += player.character.xVelocity
+      } else {
+        player.character.xVelocity = 0
+      }
       if (player.character.xVelocity != 0) {
       player.character.xVelocity -= player.character.xVelocity / Math.abs(player.character.xVelocity)
       }
-      checkIfOnGround(player)
-      checkIfHeadBump(player)
-      checkForSideCollisions(player)
+      player.character.isOnGround = checkIfOnGround(player)
+      player.character.headBump = checkIfHeadBump(player)
     }
   }
     

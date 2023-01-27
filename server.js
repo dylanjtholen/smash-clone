@@ -1,4 +1,4 @@
-const { initGame, gameLoop } = require('./game');
+const { initGame, gameLoop, keyPress } = require('./game');
 
 const express = require('express');
 const app = express();
@@ -132,6 +132,7 @@ io.on('connection', client => {
     let roomName = clientRooms[client.id]
     let player = state[roomName].players.find(item => item.id == client.id)
     player.keys[key] = true
+    keyPress(player, key)
   }
 
   function handleKeyUp(key) {
