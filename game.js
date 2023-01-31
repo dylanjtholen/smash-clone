@@ -126,9 +126,11 @@ function checkFutureSideCollisions(player, distance, add1) {
       let player = gameState.players[i]
       if (player.keys['a'] && player.character.xVelocity >= -15 && (!checkFutureSideCollisions(player, -playerSpeed) || player.character.isOnGround)) {
         player.character.xVelocity -= playerSpeed
+        player.character.direction = 'left'
       }
       if (player.keys['d'] && player.character.xVelocity <= 15 && (!checkFutureSideCollisions(player, playerSpeed) || player.character.isOnGround)) {
         player.character.xVelocity += playerSpeed
+        player.character.direction = 'right'
       }
 
       if (player.character.isOnGround) {

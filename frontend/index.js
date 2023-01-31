@@ -30,28 +30,35 @@ const animationFrameWidth = 128
 const animationFrameHeight = 128
 
 /* 
-neutral, left neutral, right neutral, attack up, attack left
-attack right, attack down, walkleft1, walkright1
-walkleft2, walkright2, jumpleft, jumpright
-fall left, fall right
+neutral, left neutral, right neutral, attack up
+attack left, attack right, attack down, walkleft1
+walkright1, walkleft2, walkright2, jumpleft
+jumpright, jumpneutral, fall left, fall right
+fall neutral
 */
 
 function findAnimationFrame(player) {
   let pos = {x: 0, y: 0}
-  if (player.keys['a']) {
-    if (player.character.yVelocity < 0) {
-      pos = {x: 2, y: 2}
-    }
-    if (player.character.yVelocity > 0) {
-      pos = {x: 0, y: 3}
-    }
+  if (player.character.yVelocity > 0) {
+    pos = {x: 0, y: 4}
   }
-  if (player.keys['d']) {
+  if (player.character.yVelocity < 0) {
+    pos = {x: 1, y: 3}
+  } 
+  if (player.keys['a']) {
     if (player.character.yVelocity < 0) {
       pos = {x: 3, y: 2}
     }
     if (player.character.yVelocity > 0) {
-      pos = {x: 1, y: 3}
+      pos = {x: 2, y: 3}
+    }
+  }
+  if (player.keys['d']) {
+    if (player.character.yVelocity < 0) {
+      pos = {x: 0, y: 3}
+    }
+    if (player.character.yVelocity > 0) {
+      pos = {x: 3, y: 3}
     }
   }
   return {x: pos.x * animationFrameWidth, y: pos.y * animationFrameHeight}
