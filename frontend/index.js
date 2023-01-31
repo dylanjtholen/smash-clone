@@ -24,6 +24,39 @@ console.log(queryString);
 const urlParams = new URLSearchParams(queryString);
 let server = urlParams.get('g') || 'https://dylanjtholen-bug-free-lamp-7grqpxq7jwcwj9-3000.preview.app.github.dev/'
 
+const playerSpritesheet = new Image()
+playerSpritesheet.src = 'sprites/playerspritesheet.png'
+const animationFrameWidth = 128
+const animationFrameHeight = 128
+
+/* 
+neutral, left neutral, right neutral, attack up, attack left
+attack right, attack down, walkleft1, walkright1
+walkleft2, walkright2, jumpleft, jumpright
+fall left, fall right
+*/
+
+function findAnimationFrame(player) {
+  let pos = {x: 0, y: 0}
+  if (player.keys['a']) {
+    if (player.character.yVelocity < 0) {
+      pos = {x: 2, y: 2}
+    }
+    if (player.character.yVelocity > 0) {
+      pos = {x: 0, y: 3}
+    }
+  }
+  if (player.keys['d']) {
+    if (player.character.yVelocity < 0) {
+      pos = {x: 3, y: 2}
+    }
+    if (player.character.yVelocity > 0) {
+      pos = {x: 1, y: 3}
+    }
+  }
+  return {x: pos.x * animationFrameWidth, y: pos.y * animationFrameHeight}
+}
+
 const socket = io();
 
 socket.on('init', handleInit);
@@ -187,7 +220,9 @@ function drawGame(state) {
 
   for (let i in gameState.players) {
     let player = gameState.players[i]
+    let pos = findAnimationFrame(player)
     c.fillRect(player.character.x, player.character.y, playerWidth, playerHeight)
+    c.drawImage(playerSpritesheet, pos.x, pos.y, animationFrameWidth, animationFrameHeight, player.character.x, player.character.y, playerWidth, playerHeight)
   }
   
 }
@@ -200,7 +235,7 @@ function handleGameState(state) {
   if (!gameActive) {
   return
   }
-  let gameState = JSON.parse(state);
+  let gameState = JSON.parse(state)
   let playersList = ''
     for (let i in gameState.players) {
       let player = gameState.players[i]

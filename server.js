@@ -77,7 +77,7 @@ io.on('connection', client => {
     clientRooms[client.id] = roomName;
 
     client.join(roomName);
-    state[roomName].players.push({username: username, id: client.id, keysDown: [], character: {x: 0, y: 0, xVelocity: 0, yVelocity: 0}, keys: []})
+    state[roomName].players.push({username: username, id: client.id, character: {x: 0, y: 0, xVelocity: 0, yVelocity: 0}, keys: {}})
     client.number = 2;
     client.emit('init', 2);
       }
@@ -114,7 +114,7 @@ io.on('connection', client => {
     }
 
     state[roomName] = initGame();
-    state[roomName].players.push({username: username, id: client.id, keysDown: [], character: {x: 0, y: 0, xVelocity: 0, yVelocity: 0}, keys: []})
+    state[roomName].players.push({username: username, id: client.id, character: {x: 0, y: 0, xVelocity: 0, yVelocity: 0}, keys: {}})
 
     client.join(roomName);
     client.number = 1;

@@ -154,8 +154,10 @@ function checkFutureSideCollisions(player, distance, add1) {
       } else if (!checkFutureSideCollisions(player, player.character.xVelocity, false)) {
         player.character.x += player.character.xVelocity
       } else {
+        if (player.character.xVelocity)
         player.character.xVelocity = 0
       }
+
       if (player.character.xVelocity != 0) {
       player.character.xVelocity -= player.character.xVelocity / Math.abs(player.character.xVelocity)
       }
