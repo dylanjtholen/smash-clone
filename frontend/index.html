@@ -5,6 +5,7 @@
   <title>Multiplayer</title>
   <!--<script src="https://kylemit.github.io/firebug-console/firebug-lite-debug.js"></script>-->
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous" id="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css">
   
 <style>
 #gameScreen {
@@ -20,7 +21,7 @@
         <div class="d-flex flex-column align-items-center justify-content-center h-100">
             <h1>FS</h1>
             <div class="form-group">
-              <input type="text" placeholder="Enter Username" id="usernameInput"/>
+              <input type="text" autocomplete="off" placeholder="Enter Username" id="usernameInput"/>
             </div>
             <p></p>
             <button
@@ -32,7 +33,7 @@
             </button>
             <div>OR</div>
             <div class="form-group">
-              <input type="text" placeholder="Enter Game Code" id="gameCodeInput"/>
+              <input type="text" autocomplete="off" placeholder="Enter Game Code" id="gameCodeInput"/>
             </div>
             <button
               type="submit"
@@ -60,6 +61,13 @@
             </button>
           <p class="sidebar">Players:</p>
           <div id="playersDiv"></div>
+          <div id="chatContainer">
+          <div id="chatDiv"><div id="chatAnchor"></div></div>
+            <form id="form" action="">
+              <input placeholder="Send a message..." id="chatInput" class="btn btn-success" />
+              <button id="sendButton" class="btn btn-success"><i class="fa fa-paper-plane-o"></i></button>
+            </form>
+          </div>
           </div>
         </div>
         <canvas id="canvas"></canvas>

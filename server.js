@@ -37,6 +37,7 @@ io.on('connection', client => {
   client.on('startGame', handleStartGame)
   client.on('keydown', handleKeyDown)
   client.on('keyup', handleKeyUp)
+  client.on('chatMessage', handleChatMessage)
 
   function handleJoinGame({roomName, username}) {
     const room = io.sockets.adapter.rooms.get(roomName);
@@ -77,7 +78,7 @@ io.on('connection', client => {
     clientRooms[client.id] = roomName;
 
     client.join(roomName);
-    state[roomName].players.push({username: username, id: client.id, character: {x: 0, y: 0, xVelocity: 0, yVelocity: 0}, keys: {}})
+    state[roomName].players.push({username: username, id: client.id, character: {x: 0, y: 0, xVelocity: 0, yVelocity: 0, attackCooldown: 0}, keys: {}})
     client.number = 2;
     client.emit('init', 2);
       }
@@ -114,7 +115,7 @@ io.on('connection', client => {
     }
 
     state[roomName] = initGame();
-    state[roomName].players.push({username: username, id: client.id, character: {x: 0, y: 0, xVelocity: 0, yVelocity: 0}, keys: {}})
+    state[roomName].players.push({username: username, id: client.id, character: {x: 0, y: 0, xVelocity: 0, yVelocity: 0, attackCooldown: 0}, keys: {}})
 
     client.join(roomName);
     client.number = 1;
@@ -139,6 +140,12 @@ io.on('connection', client => {
     let roomName = clientRooms[client.id]
     let player = state[roomName].players.find(item => item.id == client.id)
     player.keys[key] = false
+  }
+
+  function handleChatMessage(message) {
+    let roomName = clientRooms[client.id]
+    let player = state[roomName].players.find(item => item.id == client.id)
+    state[roomName].chat.push(player.username + ': ' + message)
   }
 });
 

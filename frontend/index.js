@@ -37,6 +37,33 @@ jumpright, jumpneutral, fall left, fall right
 fall neutral
 */
 
+const form = document.getElementById('form')
+var input = document.getElementById('chatInput')
+
+form.addEventListener('submit', function(e) {
+  e.preventDefault()
+  if (input.value) {
+    socket.emit('chatMessage', input.value)
+    input.value = ''
+  }
+})
+
+const targetNode = document.getElementById("chatDiv");
+
+const config = { childList: true };
+
+const callback = function (mutationsList, observer) {
+  for (let mutation of mutationsList) {
+    if (mutation.type === "childList") {
+      targetNode.scrollTo(0, targetNode.scrollHeight);
+    }
+  }
+};
+
+const observer = new MutationObserver(callback);
+observer.observe(targetNode, config);
+
+
 function findAnimationFrame(player) {
   let pos = {x: 0, y: 0}
   if (player.character.yVelocity > 0) {
@@ -45,7 +72,29 @@ function findAnimationFrame(player) {
   if (player.character.yVelocity < 0) {
     pos = {x: 1, y: 3}
   } 
+  if (player.character.direction == 'left') {
+    pos = {x: 1, y: 0}
+  }
+  if (player.character.direction == 'right') {
+    pos = {x: 2, y: 0}
+  }
   if (player.keys['a']) {
+    //left walking animation
+    if (player.character.x % 2 == 0) {
+      pos = {x: 1, y: 2}
+    } else {
+      pos = {x: 3, y: 1}
+    }
+  }
+  if (player.keys['d']) {
+    //right walking animation
+    if (player.character.x % 2 == 0) {
+      pos = {x: 0, y: 2}
+    } else {
+      pos = {x: 2, y: 2}
+    }
+  }
+  if (player.character.direction == 'left') {
     if (player.character.yVelocity < 0) {
       pos = {x: 3, y: 2}
     }
@@ -53,7 +102,7 @@ function findAnimationFrame(player) {
       pos = {x: 2, y: 3}
     }
   }
-  if (player.keys['d']) {
+  if (player.character.direction == 'right') {
     if (player.character.yVelocity < 0) {
       pos = {x: 0, y: 3}
     }
@@ -61,6 +110,23 @@ function findAnimationFrame(player) {
       pos = {x: 3, y: 3}
     }
   }
+
+  if (player.character.isAttacking) {
+    pos = {x: 1, y: 1}
+    if (player.character.direction == 'right') {
+      pos = {x: 1, y: 1}
+    }
+    if (player.character.direction == 'left') {
+      pos = {x: 0, y: 1}
+    }
+    if (player.character.yVelocity < 0) {
+      pos = {x: 3, y: 0}
+    }
+    if (player.character.yVelocity > 0) {
+      pos = {x: 2, y: 1}
+    }
+  }
+
   return {x: pos.x * animationFrameWidth, y: pos.y * animationFrameHeight}
 }
 
@@ -249,6 +315,16 @@ function handleGameState(state) {
       playersList += `<p>${player.username}</p>`
     }
     document.getElementById('playersDiv').innerHTML = playersList
+
+    let chatList = ''
+    for (let i in gameState.chat) {
+      let message = gameState.chat[i]
+      chatList += `<p>${message}</p>`
+    }
+    if (document.getElementById('chatDiv').innerHTML != chatList) {
+    document.getElementById('chatDiv').innerHTML = chatList
+    }
+
   if (!gameState.gameStarted) {
     return;
   }

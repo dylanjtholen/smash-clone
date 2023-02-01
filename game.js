@@ -45,6 +45,13 @@ module.exports = {
         player.character.xVelocity -= playerSpeed * 7
       }
     }
+    if (key == 'c') {
+      if (player.character.attackCooldown <= 0) {
+        player.character.attackCooldown = 5
+        player.character.attackTimer = 20
+        player.character.isAttacking = true
+      }
+    }
   }
 
   function checkForWallJumps(player) {
@@ -107,7 +114,8 @@ function checkFutureSideCollisions(player, distance, add1) {
       gameStarted: false,
       players: [],
       ground: ground,
-      jumpableWalls: jumpableWalls
+      jumpableWalls: jumpableWalls,
+      chat: ['SYSTEM: game started']
     };
   }
   
@@ -122,8 +130,25 @@ function checkFutureSideCollisions(player, distance, add1) {
 
     if (gameState.gameStarted) {
 
-    for (let i in gameState.players) {
+      for (let i in gameState.players) {
       let player = gameState.players[i]
+
+      if (player.character.isAttacking) {
+
+      if (player.character.attackTimer > 0) {
+        player.character.attackTimer -= 1
+      }
+      
+      if (player.character.attackTimer <= 0) {
+        player.character.isAttacking = false
+      }
+    
+    } else {
+
+      if (player.character.attackCooldown > 0) {
+        player.character.attackCooldown -= 1
+      }
+
       if (player.keys['a'] && player.character.xVelocity >= -15 && (!checkFutureSideCollisions(player, -playerSpeed) || player.character.isOnGround)) {
         player.character.xVelocity -= playerSpeed
         player.character.direction = 'left'
@@ -163,8 +188,10 @@ function checkFutureSideCollisions(player, distance, add1) {
       if (player.character.xVelocity != 0) {
       player.character.xVelocity -= player.character.xVelocity / Math.abs(player.character.xVelocity)
       }
+
       player.character.isOnGround = checkIfOnGround(player)
       player.character.headBump = checkIfHeadBump(player)
+    }
     }
   }
     

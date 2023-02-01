@@ -80,3 +80,28 @@ canvas {
     line-height: 1.5;
     border-radius: 0.25rem;
 }
+
+#form {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  color: #fff;
+    border-color: #28a745;
+}
+
+#sendButton {
+  color: #fff;
+    background-color: #28a745;
+    border-color: #28a745;
+}
+
+#chatInput {
+  color: #fff;
+  border-color: #28a745;
+  font-size: 12px;
+}
+
+#chatDiv {
+  height: 350px;
+  overflow-y:auto;
+}
